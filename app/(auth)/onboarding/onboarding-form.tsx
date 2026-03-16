@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -59,10 +60,21 @@ type BrandValues = z.infer<typeof brandSchema>;
 export default function OnboardingForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const role = searchParams.get("role") as "creator" | "brand" | null;
+  const urlRole = searchParams.get("role") as "creator" | "brand" | null;
 
   const [loading, setLoading] = useState(false);
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
+  const [role, setRole] = useState<"creator" | "brand" | null>(urlRole);
+
+  // If URL param is missing, get role from the authenticated session metadata
+  useEffect(() => {
+    if (urlRole) return;
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      const metaRole = user?.user_metadata?.role as "creator" | "brand" | undefined;
+      if (metaRole) setRole(metaRole);
+    });
+  }, [urlRole]);
 
   const creatorForm = useForm<CreatorValues>({
     resolver: zodResolver(creatorSchema),

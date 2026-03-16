@@ -7,7 +7,7 @@ import { z } from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ type SignupValues = z.infer<typeof signupSchema>;
 export default function SignupPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const {
     register,
@@ -51,11 +52,12 @@ export default function SignupPage() {
     setLoading(true);
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: {
         data: { role: values.role },
+        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/onboarding`,
       },
     });
 
@@ -65,9 +67,38 @@ export default function SignupPage() {
       return;
     }
 
-    // Persist role for onboarding (session may not be active until email confirmed)
-    // We store it in metadata; onboarding reads it from user.user_metadata.role
-    router.push(`/onboarding?role=${values.role}`);
+    if (data.session) {
+      // Email confirmation disabled — session is live, go straight to onboarding
+      router.push(`/onboarding?role=${values.role}`);
+    } else {
+      // Email confirmation required — tell user to check their inbox
+      setEmailSent(true);
+      setLoading(false);
+    }
+  }
+
+  if (emailSent) {
+    return (
+      <Card>
+        <CardContent className="pt-8 pb-8 flex flex-col items-center text-center gap-4">
+          <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center">
+            <Mail className="h-6 w-6 text-[#4F46E5]" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-lg">Check your email</h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              We&apos;ve sent you a confirmation link. Click it to activate your account and complete your profile.
+            </p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Already confirmed?{" "}
+            <Link href="/login" className="text-[#4F46E5] font-medium hover:underline">
+              Log in
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

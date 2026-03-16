@@ -66,6 +66,8 @@ export async function middleware(request: NextRequest) {
     if (!profile) {
       const url = request.nextUrl.clone();
       url.pathname = "/onboarding";
+      const role = (user.user_metadata?.role as string) ?? "";
+      if (role) url.searchParams.set("role", role);
       return NextResponse.redirect(url);
     }
   }
