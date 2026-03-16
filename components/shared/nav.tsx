@@ -52,7 +52,7 @@ export default function Nav({ profile }: NavProps) {
     <header className="sticky top-0 z-50 bg-white border-b">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/dashboard" className="text-xl font-bold text-[#FF6B4A]">
+        <Link href="/dashboard" className="text-xl font-bold text-[#4F46E5]">
           Bartr
         </Link>
 
@@ -73,7 +73,7 @@ export default function Nav({ profile }: NavProps) {
         <div className="hidden md:flex items-center gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={profile.avatar_url ?? undefined} />
-            <AvatarFallback className="bg-orange-100 text-[#FF6B4A] text-xs font-semibold">
+            <AvatarFallback className="bg-indigo-100 text-[#4F46E5] text-xs font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>

@@ -62,7 +62,7 @@ export default async function PublicCreatorProfilePage({
           <ArrowLeft className="h-4 w-4" />
           All creators
         </Link>
-        <Link href="/" className="ml-auto text-lg font-bold text-[#FF6B4A]">
+        <Link href="/" className="ml-auto text-lg font-bold text-[#4F46E5]">
           Bartr
         </Link>
       </header>
@@ -74,7 +74,7 @@ export default async function PublicCreatorProfilePage({
             <div className="flex items-start gap-4">
               <Avatar className="h-16 w-16 shrink-0">
                 <AvatarImage src={profile.avatar_url ?? undefined} />
-                <AvatarFallback className="bg-orange-100 text-[#FF6B4A] text-xl font-bold">
+                <AvatarFallback className="bg-indigo-100 text-[#4F46E5] text-xl font-bold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -87,7 +87,7 @@ export default async function PublicCreatorProfilePage({
                     href={`https://instagram.com/${cp.instagram_handle}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-[#FF6B4A] transition-colors mt-0.5"
+                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-[#4F46E5] transition-colors mt-0.5"
                   >
                     <Instagram className="h-3.5 w-3.5" />@{cp.instagram_handle}
                   </a>
@@ -115,7 +115,7 @@ export default async function PublicCreatorProfilePage({
               <div className="mt-4 flex gap-6">
                 {cp.followers && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Users className="h-4 w-4 text-[#FF6B4A]" />
+                    <Users className="h-4 w-4 text-[#4F46E5]" />
                     <span className="font-semibold">
                       {formatNumber(cp.followers)}
                     </span>
@@ -124,7 +124,7 @@ export default async function PublicCreatorProfilePage({
                 )}
                 {cp.engagement_rate && (
                   <div className="flex items-center gap-2 text-sm">
-                    <TrendingUp className="h-4 w-4 text-[#FF6B4A]" />
+                    <TrendingUp className="h-4 w-4 text-[#4F46E5]" />
                     <span className="font-semibold">{cp.engagement_rate}%</span>
                     <span className="text-muted-foreground">engagement</span>
                   </div>

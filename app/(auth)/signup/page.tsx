@@ -90,7 +90,7 @@ export default function SignupPage() {
                 className={cn(
                   "rounded-lg border-2 p-4 text-left transition-colors",
                   selectedRole === "creator"
-                    ? "border-[#FF6B4A] bg-orange-50"
+                    ? "border-[#4F46E5] bg-indigo-50"
                     : "border-border hover:border-muted-foreground"
                 )}
               >
@@ -106,7 +106,7 @@ export default function SignupPage() {
                 className={cn(
                   "rounded-lg border-2 p-4 text-left transition-colors",
                   selectedRole === "brand"
-                    ? "border-[#FF6B4A] bg-orange-50"
+                    ? "border-[#4F46E5] bg-indigo-50"
                     : "border-border hover:border-muted-foreground"
                 )}
               >
@@ -161,7 +161,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <Link
               href="/login"
-              className="text-[#FF6B4A] font-medium hover:underline"
+              className="text-[#4F46E5] font-medium hover:underline"
             >
               Log in
             </Link>

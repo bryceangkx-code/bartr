@@ -268,7 +268,7 @@ export default function NewListingPage() {
                     className={cn(
                       "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
                       selectedNiches.includes(niche)
-                        ? "border-[#FF6B4A] bg-[#FF6B4A] text-white"
+                        ? "border-[#4F46E5] bg-[#4F46E5] text-white"
                         : "border-border hover:border-muted-foreground"
                     )}
                   >

@@ -83,11 +83,11 @@ export default async function CreatorDashboardPage() {
           <div className="flex items-center gap-3">
             <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
               <div
-                className="h-full bg-[#FF6B4A] transition-all"
+                className="h-full bg-[#4F46E5] transition-all"
                 style={{ width: `${completion}%` }}
               />
             </div>
-            <span className="text-sm font-semibold text-[#FF6B4A]">
+            <span className="text-sm font-semibold text-[#4F46E5]">
               {completion}%
             </span>
           </div>
@@ -118,7 +118,7 @@ export default async function CreatorDashboardPage() {
       {/* Quick actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <QuickAction
-          icon={<Instagram className="h-5 w-5 text-[#FF6B4A]" />}
+          icon={<Instagram className="h-5 w-5 text-[#4F46E5]" />}
           title={
             creatorProfile?.instagram_handle
               ? `@${creatorProfile.instagram_handle}`
@@ -133,14 +133,14 @@ export default async function CreatorDashboardPage() {
           cta={creatorProfile?.instagram_handle ? "Edit stats" : "Add now"}
         />
         <QuickAction
-          icon={<Package className="h-5 w-5 text-[#FF6B4A]" />}
+          icon={<Package className="h-5 w-5 text-[#4F46E5]" />}
           title="Browse listings"
           description="Find brands offering products for your content"
           href="/browse"
           cta="Browse deals"
         />
         <QuickAction
-          icon={<CheckCircle2 className="h-5 w-5 text-[#FF6B4A]" />}
+          icon={<CheckCircle2 className="h-5 w-5 text-[#4F46E5]" />}
           title="My deals"
           description={`${recentDeals?.length ?? 0} active deal${recentDeals?.length !== 1 ? "s" : ""}`}
           href="/dashboard/creator/deals"
@@ -191,7 +191,7 @@ function CompletionItem({ done, label }: { done: boolean; label: string }) {
   return (
     <div className={`flex items-center gap-2 ${done ? "text-foreground" : "text-muted-foreground"}`}>
       <div
-        className={`h-2 w-2 rounded-full ${done ? "bg-[#FF6B4A]" : "bg-muted-foreground/30"}`}
+        className={`h-2 w-2 rounded-full ${done ? "bg-[#4F46E5]" : "bg-muted-foreground/30"}`}
       />
       {label}
     </div>
@@ -230,7 +230,7 @@ function StatusBadge({ status }: { status: string }) {
     applied: "bg-blue-100 text-blue-700",
     accepted: "bg-green-100 text-green-700",
     rejected: "bg-red-100 text-red-700",
-    in_progress: "bg-orange-100 text-orange-700",
+    in_progress: "bg-indigo-100 text-indigo-700",
     completed: "bg-gray-100 text-gray-700",
     cancelled: "bg-gray-100 text-gray-500",
   };

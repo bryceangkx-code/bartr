@@ -51,12 +51,13 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        coral: {
-          DEFAULT: "#FF6B4A",
-          50: "#fff3f0",
-          100: "#ffe4de",
-          500: "#FF6B4A",
-          600: "#e85a38",
+        brand: {
+          DEFAULT: "#4F46E5",
+          50: "#eef2ff",
+          100: "#e0e7ff",
+          500: "#6366f1",
+          600: "#4F46E5",
+          700: "#4338CA",
         },
       },
       borderRadius: {
