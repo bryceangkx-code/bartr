@@ -51,7 +51,7 @@ export default async function CreatorDashboardPage() {
   const checks = [
     !!profile.display_name,
     !!profile.bio,
-    !!creatorProfile?.instagram_handle,
+    !!(creatorProfile?.instagram_handle && creatorProfile?.followers),
     (creatorProfile?.niches ?? []).length > 0,
     (creatorProfile?.portfolio_urls ?? []).length > 0,
   ];
@@ -95,8 +95,8 @@ export default async function CreatorDashboardPage() {
             <CompletionItem done={!!profile.display_name} label="Display name" />
             <CompletionItem done={!!profile.bio} label="Bio" />
             <CompletionItem
-              done={!!creatorProfile?.instagram_handle}
-              label="Instagram connected"
+              done={!!(creatorProfile?.instagram_handle && creatorProfile?.followers)}
+              label="Instagram stats"
             />
             <CompletionItem
               done={(creatorProfile?.niches ?? []).length > 0}
@@ -120,17 +120,17 @@ export default async function CreatorDashboardPage() {
         <QuickAction
           icon={<Instagram className="h-5 w-5 text-[#FF6B4A]" />}
           title={
-            creatorProfile?.verified_at
-              ? "Instagram verified ✓"
-              : "Connect Instagram"
+            creatorProfile?.instagram_handle
+              ? `@${creatorProfile.instagram_handle}`
+              : "Add Instagram stats"
           }
           description={
-            creatorProfile?.verified_at
-              ? `@${creatorProfile.instagram_handle} · ${(creatorProfile.followers ?? 0).toLocaleString()} followers`
-              : "Verify your reach to unlock more deals"
+            creatorProfile?.instagram_handle
+              ? `${(creatorProfile.followers ?? 0).toLocaleString()} followers · ${creatorProfile.engagement_rate ?? 0}% ER`
+              : "Add your handle and follower count"
           }
-          href="/dashboard/creator/instagram"
-          cta={creatorProfile?.verified_at ? "View stats" : "Connect now"}
+          href="/dashboard/creator/profile"
+          cta={creatorProfile?.instagram_handle ? "Edit stats" : "Add now"}
         />
         <QuickAction
           icon={<Package className="h-5 w-5 text-[#FF6B4A]" />}
