@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/database";
 
 interface NavProps {
@@ -17,6 +18,7 @@ interface NavProps {
 
 export default function Nav({ profile }: NavProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const isCreator = profile.role === "creator";
@@ -58,15 +60,23 @@ export default function Nav({ profile }: NavProps) {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="px-3 py-1.5 text-sm text-muted-foreground rounded-md hover:bg-muted hover:text-foreground transition-colors"
-            >
-              {l.label}
-            </Link>
-          ))}
+          {links.map((l) => {
+            const active = pathname === l.href || pathname.startsWith(l.href + "/");
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={cn(
+                  "px-3 py-1.5 text-sm rounded-md transition-colors",
+                  active
+                    ? "text-[#7C3AED] font-medium"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Right — avatar + sign out */}
@@ -95,16 +105,22 @@ export default function Nav({ profile }: NavProps) {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t bg-white px-4 py-3 space-y-1">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              onClick={() => setMenuOpen(false)}
-              className="block px-3 py-2 text-sm rounded-md hover:bg-muted"
-            >
-              {l.label}
-            </Link>
-          ))}
+          {links.map((l) => {
+            const active = pathname === l.href || pathname.startsWith(l.href + "/");
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={() => setMenuOpen(false)}
+                className={cn(
+                  "block px-3 py-2 text-sm rounded-md",
+                  active ? "text-[#7C3AED] font-medium bg-violet-50" : "hover:bg-muted"
+                )}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
           <button
             onClick={signOut}
             className="flex items-center gap-2 px-3 py-2 text-sm text-destructive w-full rounded-md hover:bg-muted"
