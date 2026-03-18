@@ -61,7 +61,10 @@ export async function POST(request: Request) {
   if (insertError) {
     // Step 3 — Compensating transaction: restore the deducted credit so the
     // brand is not charged for a listing that was never persisted.
-    await admin.rpc("increment_brand_credit_compensate", { p_brand_id: user.id });
+    const { error: compensateError } = await admin.rpc("increment_brand_credit_compensate", { p_brand_id: user.id });
+    if (compensateError) {
+      console.error("Failed to compensate credit after listing insert failure:", compensateError.message);
+    }
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
