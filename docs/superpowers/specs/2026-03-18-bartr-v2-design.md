@@ -133,10 +133,7 @@ No fabricated testimonials or stats.
 
 ### 7.1 Data Model
 
-**Add to `brand_profiles`:**
-```sql
-credits INTEGER NOT NULL DEFAULT 0
-```
+**`brand_profiles.credits`:** Already exists in `001_initial_schema.sql` — no migration step needed for this column. Shown here for reference only.
 
 **New table `credit_transactions`:**
 ```sql
@@ -162,7 +159,7 @@ CREATE TABLE credit_transactions (
 |---|---|
 | Post a listing | 1 credit |
 | Feature a listing (top of /browse) | 2 credits |
-| View a report (future) | TBD |
+| View a report (future) | 3 credits |
 
 ### 7.3 Stripe Integration
 
@@ -191,7 +188,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 
 ### 7.4 Brand Dashboard Credit UI
 - Credit balance shown prominently in brand dashboard header: "⚡ 5 credits"
-- "Buy Credits" button opens credit pack selector
+- "Buy Credits" button opens an inline card grid (3 cards: Starter / Growth / Pro) showing credits and SGD price for each pack. Clicking a pack POSTs to `/api/stripe/checkout` with the selected pack identifier and redirects the browser to the returned Stripe Checkout URL. The selector lives on the brand dashboard page — no modal required.
 - Transaction history tab in dashboard showing spend + top-up history
 
 ### 7.5 Admin Credit Grant
@@ -226,13 +223,13 @@ instagram_token_expires_at TIMESTAMPTZ
 ### 8.3 OAuth Flow
 1. Creator clicks "Connect Instagram" on profile page
 2. Redirect to Facebook OAuth: `https://www.facebook.com/v19.0/dialog/oauth?...`
-   - Scopes: `instagram_basic`, `pages_show_list`, `instagram_manage_insights`
+   - Scopes: `instagram_basic`, `pages_show_list` only. **Do NOT request `instagram_manage_insights`** — it requires Meta App Review and will fail for all non-developer users until approved. Engagement rate calculation is deferred until App Review is granted; store `engagement_rate` as `null` for all verified accounts initially.
    - Note: only works for Instagram Business or Creator accounts linked to a Facebook Page
 3. Facebook redirects to `/api/auth/instagram/callback?code=...`
 4. Exchange code for access token via server-side call
 5. Call Graph API: `GET /me/accounts` → get connected Instagram Business Account
 6. Call `GET /{ig-user-id}?fields=username,followers_count,media_count`
-7. Calculate engagement rate from recent 12 posts: fetch `GET /{ig-user-id}/media?fields=like_count,comments_count,timestamp`, average `(likes + comments) / followers_count * 100`
+7. Calculate engagement rate from recent 12 posts: fetch `GET /{ig-user-id}/media?fields=like_count,comments_count,timestamp`, average `(likes + comments) / followers_count * 100`. Note: `like_count` and `comments_count` may be restricted depending on app review status — if unavailable, store `engagement_rate` as `null` (not 0) so UI can distinguish "not calculated" from "zero engagement"
 8. Store verified stats + encrypted token in `creator_profiles`
 9. Set `instagram_verified = true`
 10. Redirect to `/dashboard/creator/profile?instagram=connected`
@@ -365,7 +362,7 @@ FACEBOOK_APP_ID=
 FACEBOOK_APP_SECRET=
 
 # Admin
-ADMIN_SECRET=
+ADMIN_SECRET=your_admin_secret_here
 ```
 
 ---
