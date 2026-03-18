@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
   const { package: packageName } = body;
 
-  const validPackages: PackageKey[] = ["starter", "growth", "pro"];
+  const validPackages = Object.keys(PACKAGES) as Array<keyof typeof PACKAGES>;
   if (!packageName || !validPackages.includes(packageName as PackageKey)) {
     return NextResponse.json(
       { error: "Invalid package. Must be one of: starter, growth, pro" },
@@ -40,6 +40,11 @@ export async function POST(request: Request) {
   }
 
   const pkg = PACKAGES[packageName as PackageKey];
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl) {
+    return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+  }
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -59,13 +64,13 @@ export async function POST(request: Request) {
         brand_id: user.id,
         credits: String(pkg.credits),
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/brand?credits=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/brand`,
+      success_url: `${appUrl}/dashboard/brand?credits=success`,
+      cancel_url: `${appUrl}/dashboard/brand`,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Stripe error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[stripe/checkout]", err);
+    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
   }
 }
