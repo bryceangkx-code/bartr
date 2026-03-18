@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -12,13 +12,13 @@ function errorRedirect(reason: string): NextResponse {
   );
 }
 
-export async function GET(request: Request): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   // Check required env vars
   const appId = process.env.FACEBOOK_APP_ID;
   const appSecret = process.env.FACEBOOK_APP_SECRET;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
-  if (!appId || !appSecret) {
+  if (!appId || !appSecret || !appUrl) {
     return errorRedirect("missing_env_config");
   }
 
@@ -28,6 +28,12 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   if (!code || !state) {
     return errorRedirect("missing_code_or_state");
+  }
+
+  // Validate CSRF state against the cookie set during initiation
+  const storedState = request.cookies.get("instagram_oauth_state")?.value;
+  if (!storedState || storedState !== state) {
+    return errorRedirect("invalid_state");
   }
 
   const redirectUri = `${appUrl}/api/auth/instagram/callback`;
@@ -152,6 +158,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       ).toISOString(), // 60 days
       instagram_user_id: igAccountId,
       instagram_handle: igUsername,
+      followers: igData.followers_count ?? null,
     })
     .eq("id", user.id);
 
@@ -159,8 +166,10 @@ export async function GET(request: Request): Promise<NextResponse> {
     return errorRedirect("profile_update_failed");
   }
 
-  // Step 7: Redirect to dashboard with success indicator
-  return NextResponse.redirect(
+  // Step 7: Redirect to dashboard with success indicator, clearing the CSRF cookie
+  const successResponse = NextResponse.redirect(
     `${appUrl}/dashboard/creator?instagram=connected`
   );
+  successResponse.cookies.delete("instagram_oauth_state");
+  return successResponse;
 }
