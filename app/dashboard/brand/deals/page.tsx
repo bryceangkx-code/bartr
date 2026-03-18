@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Loader2, Users, Check, X, Package, ArrowRight, Instagram } from "lucide-react";
+
+import { VerifiedBadge } from "@/components/shared/verified-badge";
 import { toast } from "sonner";
 
 import {
@@ -22,7 +24,7 @@ import type { Deal, Listing, Profile, CreatorProfile } from "@/types/database";
 
 type Application = Deal & {
   listing: Pick<Listing, "title" | "product_value_sgd"> | null;
-  creator: Pick<Profile, "display_name" | "avatar_url"> & Pick<CreatorProfile, "instagram_handle" | "followers" | "engagement_rate"> | null;
+  creator: Pick<Profile, "display_name" | "avatar_url"> & Pick<CreatorProfile, "instagram_handle" | "followers" | "engagement_rate" | "instagram_verified"> | null;
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -74,7 +76,7 @@ export default function BrandDealsPage() {
       await Promise.all([
         supabase.from("listings").select("id, title, product_value_sgd").in("id", listingIds),
         supabase.from("profiles").select("id, display_name, avatar_url").in("id", creatorIds),
-        supabase.from("creator_profiles").select("id, instagram_handle, followers, engagement_rate").in("id", creatorIds),
+        supabase.from("creator_profiles").select("id, instagram_handle, followers, engagement_rate, instagram_verified").in("id", creatorIds),
       ]);
 
     const listingMap: Record<string, Pick<Listing, "title" | "product_value_sgd">> = {};
@@ -87,8 +89,8 @@ export default function BrandDealsPage() {
       (p) => { profileMap[p.id] = p; }
     );
 
-    const cpMap: Record<string, Pick<CreatorProfile, "instagram_handle" | "followers" | "engagement_rate">> = {};
-    (cpData as (Pick<CreatorProfile, "instagram_handle" | "followers" | "engagement_rate"> & { id: string })[] | null)?.forEach(
+    const cpMap: Record<string, Pick<CreatorProfile, "instagram_handle" | "followers" | "engagement_rate" | "instagram_verified">> = {};
+    (cpData as (Pick<CreatorProfile, "instagram_handle" | "followers" | "engagement_rate" | "instagram_verified"> & { id: string })[] | null)?.forEach(
       (cp) => { cpMap[cp.id] = cp; }
     );
 
@@ -103,6 +105,7 @@ export default function BrandDealsPage() {
               instagram_handle: cpMap[d.creator_id]?.instagram_handle ?? null,
               followers: cpMap[d.creator_id]?.followers ?? null,
               engagement_rate: cpMap[d.creator_id]?.engagement_rate ?? null,
+              instagram_verified: cpMap[d.creator_id]?.instagram_verified ?? null,
             }
           : null,
       }))
@@ -231,8 +234,9 @@ export default function BrandDealsPage() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
-                      <p className="font-semibold text-sm">
+                      <p className="font-semibold text-sm flex items-center gap-1">
                         {app.creator?.display_name ?? "Creator"}
+                        {app.creator?.instagram_verified && <VerifiedBadge />}
                       </p>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                         {app.creator?.instagram_handle && (

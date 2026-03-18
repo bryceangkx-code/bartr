@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Instagram, MapPin, Users, TrendingUp, ArrowLeft } from "lucide-react";
 
+import { VerifiedBadge } from "@/components/shared/verified-badge";
+
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -79,8 +81,9 @@ export default async function PublicCreatorProfilePage({
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl font-bold truncate">
+                <h1 className="text-xl font-bold truncate flex items-center gap-1.5">
                   {profile.display_name ?? "Creator"}
+                  {cp?.instagram_verified && <VerifiedBadge />}
                 </h1>
                 {cp?.instagram_handle && (
                   <a

@@ -4,6 +4,8 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Search, Users, SlidersHorizontal, X, Instagram } from "lucide-react";
 
+import { VerifiedBadge } from "@/components/shared/verified-badge";
+
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +21,7 @@ import { cn } from "@/lib/utils";
 import type { Profile, CreatorProfile } from "@/types/database";
 
 type CreatorCard = Pick<Profile, "id" | "display_name" | "avatar_url" | "bio" | "location"> &
-  Pick<CreatorProfile, "instagram_handle" | "followers" | "engagement_rate" | "niches">;
+  Pick<CreatorProfile, "instagram_handle" | "followers" | "engagement_rate" | "niches" | "instagram_verified">;
 
 function formatNumber(n: number | null) {
   if (!n) return null;
@@ -54,7 +56,7 @@ export default function CreatorsPage() {
       const ids = profiles.map((p) => p.id);
       const { data: cpData } = await supabase
         .from("creator_profiles")
-        .select("id, instagram_handle, followers, engagement_rate, niches")
+        .select("id, instagram_handle, followers, engagement_rate, niches, instagram_verified")
         .in("id", ids);
 
       const cpMap: Record<string, Partial<CreatorProfile>> = {};
@@ -69,6 +71,7 @@ export default function CreatorsPage() {
           followers: cpMap[p.id]?.followers ?? null,
           engagement_rate: cpMap[p.id]?.engagement_rate ?? null,
           niches: cpMap[p.id]?.niches ?? null,
+          instagram_verified: cpMap[p.id]?.instagram_verified ?? null,
         }))
       );
       setLoading(false);
@@ -260,8 +263,9 @@ export default function CreatorsPage() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
-                          <p className="font-semibold text-sm truncate">
+                          <p className="font-semibold text-sm truncate flex items-center gap-1">
                             {creator.display_name ?? "Creator"}
+                            {creator.instagram_verified && <VerifiedBadge />}
                           </p>
                           {creator.instagram_handle ? (
                             <p className="text-xs text-muted-foreground flex items-center gap-1 truncate">
