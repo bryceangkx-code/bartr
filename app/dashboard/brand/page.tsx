@@ -11,17 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { Profile, BrandProfile, Deal, Listing } from "@/types/database";
+import type { Profile, BrandProfile, CreditTransaction, Deal, Listing } from "@/types/database";
 import { CreditsSection } from "./credits-section";
-
-type CreditTransaction = {
-  id: string;
-  brand_id: string;
-  amount: number;
-  action: string;
-  note: string | null;
-  created_at: string;
-};
 
 type DealWithListing = Deal & { listings: Pick<Listing, "title"> | null };
 type ListingRow = Pick<Listing, "id" | "title" | "status">;

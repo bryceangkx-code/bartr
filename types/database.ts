@@ -220,3 +220,14 @@ export type Deal = Database["public"]["Tables"]["deals"]["Row"];
 export type DealStatus = Deal["status"];
 export type ListingStatus = Listing["status"];
 export type UserRole = Profile["role"];
+
+export type CreditTransaction = {
+  id: string;
+  brand_id: string;
+  amount: number;
+  action: "topup" | "post_listing" | "feature_listing" | "admin_grant";
+  stripe_session_id: string | null;
+  listing_id: string | null;
+  note: string | null;
+  created_at: string;
+};

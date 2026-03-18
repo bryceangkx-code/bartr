@@ -14,15 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-type CreditTransaction = {
-  id: string;
-  brand_id: string;
-  amount: number;
-  action: string;
-  note: string | null;
-  created_at: string;
-};
+import type { CreditTransaction } from "@/types/database";
 
 type Package = {
   key: "starter" | "growth" | "pro";
@@ -159,7 +151,7 @@ export function CreditsSection({ credits, transactions }: CreditsSectionProps) {
                       : "w-full"
                   }
                   variant={pkg.popular ? "default" : "outline"}
-                  disabled={buying !== null}
+                  disabled={buying === pkg.key}
                   onClick={() => handleBuy(pkg.key)}
                 >
                   {buying === pkg.key ? (
