@@ -16,11 +16,15 @@ export async function POST(request: Request) {
   }
 
   // 2. Verify admin role
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
+
+  if (profileError) {
+    console.error("[admin/credits] profile fetch error:", profileError.message);
+  }
 
   if ((profile as { role: string } | null)?.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
