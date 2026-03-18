@@ -52,12 +52,12 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
         brand: {
-          DEFAULT: "#4F46E5",
-          50: "#eef2ff",
-          100: "#e0e7ff",
-          500: "#6366f1",
-          600: "#4F46E5",
-          700: "#4338CA",
+          DEFAULT: "#7C3AED",
+          50: "#f5f3ff",
+          100: "#ede9fe",
+          500: "#8b5cf6",
+          600: "#7C3AED",
+          700: "#6D28D9",
         },
       },
       borderRadius: {
