@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -26,19 +27,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  // Credit check
-  const { data: brandData } = await supabase
-    .from("brand_profiles")
-    .select("credits")
-    .eq("id", user.id)
-    .single();
+  const admin = createAdminClient();
 
-  const credits = (brandData as { credits: number } | null)?.credits ?? 0;
-  if (credits < 1) {
+  // Step 1 — Atomic credit decrement (BEFORE listing insert).
+  // The Postgres function does a single UPDATE … WHERE credits >= 1 and returns
+  // TRUE only when one row was updated, eliminating the TOCTOU race condition
+  // that existed with the previous SELECT-then-UPDATE pattern.
+  const { data: deducted, error: deductError } = await admin.rpc("decrement_brand_credit", {
+    p_brand_id: user.id,
+  });
+
+  if (deductError || !deducted) {
     return NextResponse.json({ error: "Insufficient credits" }, { status: 402 });
   }
 
-  const { data, error } = await supabase
+  // Step 2 — Insert listing only after credits are successfully reserved.
+  const { data, error: insertError } = await supabase
     .from("listings")
     .insert({
       brand_id: user.id,
@@ -54,22 +58,28 @@ export async function POST(request: Request) {
     .select("id")
     .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (insertError) {
+    // Step 3 — Compensating transaction: restore the deducted credit so the
+    // brand is not charged for a listing that was never persisted.
+    await admin.rpc("increment_brand_credit_compensate", { p_brand_id: user.id });
+    return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
   const listingId = (data as { id: string }).id;
 
-  // Deduct credit and log transaction
-  const { createAdminClient } = await import("@/lib/supabase/admin");
-  const admin = createAdminClient();
-  await admin.from("brand_profiles").update({ credits: credits - 1 }).eq("id", user.id);
-  await admin.from("credit_transactions").insert({
+  // Step 4 — Log the credit transaction. Error is checked and surfaced.
+  const { error: logError } = await admin.from("credit_transactions").insert({
     brand_id: user.id,
     amount: -1,
     action: "post_listing",
     listing_id: listingId,
   });
+
+  if (logError) {
+    // Non-fatal: listing was created and credit was deducted successfully.
+    // Log for observability but do not fail the request.
+    console.error("Failed to log credit transaction:", logError.message);
+  }
 
   return NextResponse.json({ id: listingId });
 }
