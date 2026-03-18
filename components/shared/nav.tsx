@@ -48,6 +48,7 @@ export default function Nav({ profile }: NavProps) {
         { href: "/dashboard/brand/listings", label: "My Listings" },
         { href: "/creators", label: "Browse Creators" },
         { href: "/dashboard/brand/deals", label: "Applications" },
+        { href: "/dashboard/brand/reports", label: "Reports" },
       ];
 
   return (
