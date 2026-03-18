@@ -121,14 +121,11 @@ No fabricated testimonials or stats.
 
 ## 6. Critical Bug Fix
 
-### 6.1 Missing `/api/listings/create` route
-Create `app/api/listings/create/route.ts`:
-- Auth check (must be brand role)
-- **Credit check**: brand must have ≥ 1 credit before listing is created
-- Deduct 1 credit on success, insert a `credit_transactions` row
-- Validate required fields: `title`, `description`, `product_value_sgd`, `deliverables`
-- Insert into `listings` table with `status: 'active'`
-- Return created listing id
+### 6.1 Modify existing `/api/listings/create` route
+`app/api/listings/create/route.ts` exists but lacks credit gating. **Do not rewrite** — add the following to the existing route:
+- **Credit check**: fetch brand's `credits` from `brand_profiles`; return 402 if < 1
+- On successful listing insert: decrement `credits` by 1 and insert a `credit_transactions` row (`action: 'post_listing'`, `amount: -1`, `listing_id`)
+- All existing auth, role, and field validation logic must be preserved
 
 ---
 
@@ -148,8 +145,9 @@ CREATE TABLE credit_transactions (
   brand_id UUID NOT NULL REFERENCES profiles(id),
   amount INTEGER NOT NULL, -- positive = top-up, negative = spend
   action TEXT NOT NULL, -- 'topup', 'post_listing', 'feature_listing', 'admin_grant'
-  stripe_session_id TEXT, -- populated for Stripe top-ups
+  stripe_session_id TEXT UNIQUE, -- populated for Stripe top-ups; UNIQUE enforces idempotency
   listing_id UUID REFERENCES listings(id), -- populated for spend actions
+  note TEXT, -- free-text label, used by admin_grant for audit trail
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ```
@@ -180,8 +178,9 @@ CREATE TABLE credit_transactions (
 2. POST `/api/stripe/checkout` → creates Stripe Checkout Session → returns URL
 3. Brand completes payment on Stripe hosted page
 4. Stripe sends webhook to `/api/stripe/webhook`
-5. Webhook verifies signature, credits brand's wallet, inserts `credit_transactions` row
-6. Brand redirected to `/dashboard/brand?credits=success`
+5. Webhook verifies signature; check for existing `credit_transactions` row with same `stripe_session_id` — if found, return 200 and skip (idempotency guard)
+6. Credit brand's wallet, insert `credit_transactions` row
+7. Brand redirected to `/dashboard/brand?credits=success`
 
 **Env vars needed:**
 ```
@@ -198,8 +197,9 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 ### 7.5 Admin Credit Grant
 `POST /api/admin/credits` (service role only):
 - Body: `{ brand_id, amount, note }`
-- Adds credits + inserts `credit_transactions` row with `action: 'admin_grant'`
-- Protected by `ADMIN_SECRET` env var header check
+- Validate that `brand_id` exists in `brand_profiles` before granting — return 404 if not found
+- Adds credits + inserts `credit_transactions` row with `action: 'admin_grant'`, `note` stored on the row
+- Protected by `ADMIN_SECRET` env var header check (`x-admin-secret` header must match)
 
 ### 7.6 Listing Creation Gate
 `/dashboard/brand/listings/new`:
@@ -226,12 +226,13 @@ instagram_token_expires_at TIMESTAMPTZ
 ### 8.3 OAuth Flow
 1. Creator clicks "Connect Instagram" on profile page
 2. Redirect to Facebook OAuth: `https://www.facebook.com/v19.0/dialog/oauth?...`
-   - Scopes: `instagram_basic`, `pages_show_list`
+   - Scopes: `instagram_basic`, `pages_show_list`, `instagram_manage_insights`
+   - Note: only works for Instagram Business or Creator accounts linked to a Facebook Page
 3. Facebook redirects to `/api/auth/instagram/callback?code=...`
 4. Exchange code for access token via server-side call
 5. Call Graph API: `GET /me/accounts` → get connected Instagram Business Account
 6. Call `GET /{ig-user-id}?fields=username,followers_count,media_count`
-7. Calculate engagement rate from recent media (last 12 posts average)
+7. Calculate engagement rate from recent 12 posts: fetch `GET /{ig-user-id}/media?fields=like_count,comments_count,timestamp`, average `(likes + comments) / followers_count * 100`
 8. Store verified stats + encrypted token in `creator_profiles`
 9. Set `instagram_verified = true`
 10. Redirect to `/dashboard/creator/profile?instagram=connected`
@@ -249,10 +250,11 @@ FACEBOOK_APP_SECRET=
 - Self-reported stats labelled: "Self-reported" in muted text
 
 ### 8.5 Token Refresh
-Instagram long-lived tokens expire in 60 days. Add a background refresh:
-- On each profile page load (server-side), check `instagram_token_expires_at`
-- If within 7 days of expiry, refresh via Graph API and update stored token
-- If expired, set `instagram_verified = false`, prompt creator to reconnect
+Instagram long-lived tokens expire in 60 days. Refresh logic runs only when the authenticated creator views their own dashboard (not on public `/creator/[id]` pages, to avoid firing on every visitor):
+- In `app/dashboard/creator/profile/page.tsx` (server component), check `instagram_token_expires_at`
+- If within 7 days of expiry, call the Graph API refresh endpoint server-side and update the stored token
+- If expired, set `instagram_verified = false` and show a "Reconnect Instagram" prompt
+- Do not trigger refresh on unauthenticated or third-party profile views
 
 ---
 
@@ -268,10 +270,12 @@ Instagram long-lived tokens expire in 60 days. Add a background refresh:
 ```mdx
 ---
 title: string
-description: string  (used for meta description + card preview)
+description: string      # used for meta description + card preview
 date: YYYY-MM-DD
-slug: string
+slug: string             # must match the filename (e.g. file: my-post.mdx → slug: my-post); filename takes precedence in generateStaticParams
 tags: string[]
+author: string           # defaults to "Bartr Team"
+published: boolean       # defaults to true; set to false to hide from index and block the route
 ---
 ```
 
@@ -307,7 +311,7 @@ tags: string[]
 - Add "Reports" tab to brand dashboard navigation
 - Page shows: "AI-powered creator performance reports — coming soon"
 - Display the future credit cost: "Each report will cost 3 credits"
-- "Get notified when reports launch" — email capture form (stores to a `waitlist` table or just logs to console for now)
+- Static "coming soon" state only — no email capture form in this iteration (avoids ambiguity around data storage)
 
 ### 10.2 Future State (not built now)
 When a deal is marked `completed`, Claude API will generate a report containing:
@@ -322,20 +326,24 @@ When a deal is marked `completed`, Claude API will generate a report containing:
 
 ```sql
 -- Migration 003: credit system + instagram verification
-ALTER TABLE brand_profiles ADD COLUMN credits INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE creator_profiles ADD COLUMN instagram_verified BOOLEAN NOT NULL DEFAULT false;
-ALTER TABLE creator_profiles ADD COLUMN instagram_access_token TEXT;
-ALTER TABLE creator_profiles ADD COLUMN instagram_token_expires_at TIMESTAMPTZ;
+-- NOTE: brand_profiles.credits already exists in 001_initial_schema.sql — do NOT re-add
+ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS instagram_verified BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS instagram_access_token TEXT;
+ALTER TABLE creator_profiles ADD COLUMN IF NOT EXISTS instagram_token_expires_at TIMESTAMPTZ;
 
 CREATE TABLE credit_transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   amount INTEGER NOT NULL,
   action TEXT NOT NULL CHECK (action IN ('topup', 'post_listing', 'feature_listing', 'admin_grant')),
-  stripe_session_id TEXT,
+  stripe_session_id TEXT UNIQUE, -- UNIQUE constraint provides idempotency for Stripe webhooks
   listing_id UUID REFERENCES listings(id) ON DELETE SET NULL,
+  note TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX ON credit_transactions(brand_id);
+CREATE INDEX ON credit_transactions(stripe_session_id) WHERE stripe_session_id IS NOT NULL;
 
 ALTER TABLE credit_transactions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "brands read own transactions" ON credit_transactions
@@ -373,10 +381,10 @@ ADMIN_SECRET=
 - `app/(auth)/onboarding/onboarding-form.tsx` — role-aware header + next-step hint
 - `components/shared/nav.tsx` — violet active states
 - `app/dashboard/brand/listings/new/page.tsx` — credit check gate
+- `app/api/listings/create/route.ts` — add credit check + transaction insert (file already exists)
 - All other files with hardcoded indigo color values
 
 ### Created
-- `app/api/listings/create/route.ts` — listing creation with credit deduction
 - `app/api/stripe/checkout/route.ts` — create Stripe Checkout Session
 - `app/api/stripe/webhook/route.ts` — handle payment confirmation
 - `app/api/admin/credits/route.ts` — admin credit grant
