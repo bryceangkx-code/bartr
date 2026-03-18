@@ -83,62 +83,21 @@ export async function POST(request: Request) {
 
   const admin = createAdminClient();
 
-  try {
-    // Atomically increment credits using the Postgres function
-    const { error: rpcError } = await admin.rpc("add_brand_credits", {
-      p_brand_id: brandId,
-      p_amount: creditsToAdd,
-    });
+  const { data: processed, error: topupError } = await admin.rpc("topup_brand_credits", {
+    p_brand_id: brandId,
+    p_amount: creditsToAdd,
+    p_stripe_session_id: session.id,
+  });
 
-    if (rpcError) {
-      console.error("[webhook] Failed to increment credits:", rpcError);
-      return NextResponse.json(
-        { error: "Failed to update credits" },
-        { status: 500 }
-      );
-    }
-
-    // Log the transaction
-    const { error: insertError } = await admin
-      .from("credit_transactions")
-      .insert({
-        brand_id: brandId,
-        amount: creditsToAdd,
-        action: "topup",
-        stripe_session_id: session.id,
-      });
-
-    if (insertError) {
-      // Handle idempotency: duplicate stripe_session_id means webhook fired twice
-      if (
-        insertError.code === "23505" || // Postgres unique violation
-        insertError.message.includes("unique") ||
-        insertError.message.includes("duplicate")
-      ) {
-        console.warn(
-          "[webhook] Duplicate webhook for session:",
-          session.id,
-          "— returning idempotent 200"
-        );
-        return NextResponse.json({ received: true });
-      }
-
-      console.error("[webhook] Failed to insert credit transaction:", insertError);
-      return NextResponse.json(
-        { error: "Failed to log transaction" },
-        { status: 500 }
-      );
-    }
-
-    console.log(
-      `[webhook] Granted ${creditsToAdd} credits to brand ${brandId} for session ${session.id}`
-    );
-    return NextResponse.json({ received: true });
-  } catch (err) {
-    console.error("[webhook] Unexpected error:", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+  if (topupError) {
+    console.error("[stripe/webhook] topup_brand_credits error:", topupError.message);
+    return NextResponse.json({ error: "Failed to process credits" }, { status: 500 });
   }
+
+  if (!processed) {
+    // Already processed this session (idempotent replay).
+    console.log("[stripe/webhook] Duplicate session, skipping:", session.id);
+  }
+
+  return NextResponse.json({ received: true });
 }
