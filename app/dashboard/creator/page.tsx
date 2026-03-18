@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Profile, CreatorProfile, Deal, Listing } from "@/types/database";
+import { InstagramToast } from "./instagram-toast";
 
 type DealWithListing = Deal & { listings: Pick<Listing, "title"> | null };
 
@@ -61,6 +62,7 @@ export default async function CreatorDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <InstagramToast />
       {/* Welcome */}
       <div>
         <h1 className="text-2xl font-bold">
@@ -114,6 +116,59 @@ export default async function CreatorDashboardPage() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Instagram verification card */}
+      {creatorProfile?.instagram_verified ? (
+        <Card className="bg-green-50 border-green-200">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Instagram className="h-5 w-5 text-green-600" />
+              <CardTitle className="text-base">Instagram Connected</CardTitle>
+              <Badge className="bg-green-100 text-green-700 border-green-200">
+                <CheckCircle2 className="h-3 w-3 mr-1" />
+                Verified
+              </Badge>
+            </div>
+            {creatorProfile.instagram_handle && (
+              <CardDescription className="text-green-700">
+                @{creatorProfile.instagram_handle}
+                {creatorProfile.followers != null && (
+                  <> &middot; {creatorProfile.followers.toLocaleString()} followers</>
+                )}
+              </CardDescription>
+            )}
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/api/auth/instagram/initiate">Reconnect</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border-dashed border-2">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center">
+                <Instagram className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Connect Instagram</CardTitle>
+                <CardDescription>
+                  Verify your Instagram account to appear in brand searches and unlock more opportunities.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Button asChild size="sm" className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white border-0">
+              <Link href="/api/auth/instagram/initiate">
+                <Instagram className="h-4 w-4 mr-2" />
+                Connect with Instagram
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

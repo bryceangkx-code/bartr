@@ -44,6 +44,9 @@ export type Database = {
           id: string;
           instagram_handle: string | null;
           instagram_user_id: string | null;
+          instagram_verified: boolean | null;
+          instagram_access_token: string | null;
+          instagram_token_expires_at: string | null;
           followers: number | null;
           engagement_rate: number | null;
           niches: string[] | null;
@@ -54,6 +57,9 @@ export type Database = {
           id: string;
           instagram_handle?: string | null;
           instagram_user_id?: string | null;
+          instagram_verified?: boolean | null;
+          instagram_access_token?: string | null;
+          instagram_token_expires_at?: string | null;
           followers?: number | null;
           engagement_rate?: number | null;
           niches?: string[] | null;
@@ -64,6 +70,9 @@ export type Database = {
           id?: string;
           instagram_handle?: string | null;
           instagram_user_id?: string | null;
+          instagram_verified?: boolean | null;
+          instagram_access_token?: string | null;
+          instagram_token_expires_at?: string | null;
           followers?: number | null;
           engagement_rate?: number | null;
           niches?: string[] | null;
