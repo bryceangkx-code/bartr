@@ -81,8 +81,8 @@ export default function SignupPage() {
     return (
       <Card>
         <CardContent className="pt-8 pb-8 flex flex-col items-center text-center gap-4">
-          <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center">
-            <Mail className="h-6 w-6 text-[#4F46E5]" />
+          <div className="w-12 h-12 bg-violet-50 rounded-full flex items-center justify-center">
+            <Mail className="h-6 w-6 text-[#7C3AED]" />
           </div>
           <div>
             <h2 className="font-semibold text-lg">Check your email</h2>
@@ -92,7 +92,7 @@ export default function SignupPage() {
           </div>
           <p className="text-xs text-muted-foreground">
             Already confirmed?{" "}
-            <Link href="/login" className="text-[#4F46E5] font-medium hover:underline">
+            <Link href="/login" className="text-[#7C3AED] font-medium hover:underline">
               Log in
             </Link>
           </p>
@@ -121,7 +121,7 @@ export default function SignupPage() {
                 className={cn(
                   "rounded-lg border-2 p-4 text-left transition-colors",
                   selectedRole === "creator"
-                    ? "border-[#4F46E5] bg-indigo-50"
+                    ? "border-[#7C3AED] bg-violet-50"
                     : "border-border hover:border-muted-foreground"
                 )}
               >
@@ -137,7 +137,7 @@ export default function SignupPage() {
                 className={cn(
                   "rounded-lg border-2 p-4 text-left transition-colors",
                   selectedRole === "brand"
-                    ? "border-[#4F46E5] bg-indigo-50"
+                    ? "border-[#7C3AED] bg-violet-50"
                     : "border-border hover:border-muted-foreground"
                 )}
               >
@@ -192,7 +192,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <Link
               href="/login"
-              className="text-[#4F46E5] font-medium hover:underline"
+              className="text-[#7C3AED] font-medium hover:underline"
             >
               Log in
             </Link>

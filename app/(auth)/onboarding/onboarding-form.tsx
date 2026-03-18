@@ -211,7 +211,7 @@ export default function OnboardingForm() {
                     className={cn(
                       "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
                       selectedNiches.includes(niche)
-                        ? "border-[#4F46E5] bg-[#4F46E5] text-white"
+                        ? "border-[#7C3AED] bg-[#7C3AED] text-white"
                         : "border-border hover:border-muted-foreground"
                     )}
                   >

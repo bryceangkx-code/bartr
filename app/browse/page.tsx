@@ -126,7 +126,7 @@ export default function BrowsePage() {
               <SlidersHorizontal className="h-4 w-4" />
               Filters
               {activeFilterCount > 0 && (
-                <span className="bg-[#4F46E5] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="bg-[#7C3AED] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                   {activeFilterCount}
                 </span>
               )}
@@ -172,7 +172,7 @@ export default function BrowsePage() {
                     className={cn(
                       "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
                       selectedNiches.includes(niche)
-                        ? "border-[#4F46E5] bg-[#4F46E5] text-white"
+                        ? "border-[#7C3AED] bg-[#7C3AED] text-white"
                         : "border-border hover:border-muted-foreground"
                     )}
                   >
@@ -206,7 +206,7 @@ export default function BrowsePage() {
               <button
                 key={n}
                 onClick={() => toggleNiche(n)}
-                className="flex items-center gap-1 bg-indigo-50 text-[#4F46E5] text-xs font-medium px-2.5 py-1 rounded-full hover:bg-indigo-100 transition-colors"
+                className="flex items-center gap-1 bg-violet-50 text-[#7C3AED] text-xs font-medium px-2.5 py-1 rounded-full hover:bg-violet-100 transition-colors"
               >
                 {n} <X className="h-3 w-3" />
               </button>
@@ -244,7 +244,7 @@ export default function BrowsePage() {
           <div className="grid sm:grid-cols-2 gap-4">
             {filtered.map((listing) => (
               <Link key={listing.id} href={`/listings/${listing.id}`}>
-                <Card className="h-full hover:border-[#4F46E5] hover:shadow-md transition-all cursor-pointer">
+                <Card className="h-full hover:border-[#7C3AED] hover:shadow-md transition-all cursor-pointer">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
@@ -255,7 +255,7 @@ export default function BrowsePage() {
                           {listing.brand_name}
                         </CardDescription>
                       </div>
-                      <span className="shrink-0 text-sm font-bold text-[#4F46E5]">
+                      <span className="shrink-0 text-sm font-bold text-[#7C3AED]">
                         S${listing.product_value_sgd?.toFixed(0) ?? "—"}
                       </span>
                     </div>

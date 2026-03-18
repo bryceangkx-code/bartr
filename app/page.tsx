@@ -7,7 +7,7 @@ export default function HomePage() {
       {/* Nav */}
       <header className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <span className="text-xl font-bold text-[#4F46E5]">Bartr</span>
+          <span className="text-xl font-bold text-[#7C3AED]">Bartr</span>
           <div className="flex items-center gap-3">
             <Link
               href="/login"
@@ -17,7 +17,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/signup"
-              className="text-sm font-semibold bg-[#4F46E5] text-white px-4 py-2 rounded-lg hover:bg-[#4338CA] transition-colors"
+              className="text-sm font-semibold bg-[#7C3AED] text-white px-4 py-2 rounded-lg hover:bg-[#6D28D9] transition-colors"
             >
               Get started free
             </Link>
@@ -28,14 +28,14 @@ export default function HomePage() {
       <main className="flex-1">
         {/* Hero */}
         <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 pb-24 text-center">
-          <div className="inline-flex items-center gap-2 bg-indigo-50 text-[#4F46E5] text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 bg-violet-50 text-[#7C3AED] text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
             <Star className="h-3.5 w-3.5" />
             Built for Southeast Asia
           </div>
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-gray-900 leading-tight mb-6">
             Trade your influence
             <br />
-            <span className="text-[#4F46E5]">for products you love</span>
+            <span className="text-[#7C3AED]">for products you love</span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
             Bartr connects creators with brands across Southeast Asia. No sponsorship fees — just authentic partnerships where your content is the currency.
@@ -43,7 +43,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/signup"
-              className="inline-flex items-center justify-center gap-2 bg-[#4F46E5] text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-[#4338CA] transition-colors shadow-lg shadow-indigo-200"
+              className="inline-flex items-center justify-center gap-2 bg-[#7C3AED] text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-[#6D28D9] transition-colors shadow-lg shadow-violet-200"
             >
               Start for free
               <ArrowRight className="h-4 w-4" />
@@ -69,26 +69,26 @@ export default function HomePage() {
               {[
                 {
                   step: "01",
-                  icon: <Package className="h-6 w-6 text-[#4F46E5]" />,
+                  icon: <Package className="h-6 w-6 text-[#7C3AED]" />,
                   title: "Brands post listings",
                   desc: "Brands list products they want reviewed — skincare, gadgets, food, fashion — and set clear deliverable expectations.",
                 },
                 {
                   step: "02",
-                  icon: <Users className="h-6 w-6 text-[#4F46E5]" />,
+                  icon: <Users className="h-6 w-6 text-[#7C3AED]" />,
                   title: "Creators apply",
                   desc: "Creators browse listings that match their niche and audience, then apply with a short note on why they're a great fit.",
                 },
                 {
                   step: "03",
-                  icon: <Handshake className="h-6 w-6 text-[#4F46E5]" />,
+                  icon: <Handshake className="h-6 w-6 text-[#7C3AED]" />,
                   title: "Deals get done",
                   desc: "Brands pick their creator, ship the product, and the creator delivers authentic content. Everyone wins.",
                 },
               ].map(({ step, icon, title, desc }) => (
                 <div key={step} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center shrink-0">
                       {icon}
                     </div>
                     <span className="text-xs font-bold text-gray-400 tracking-widest">STEP {step}</span>
@@ -106,8 +106,8 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="grid md:grid-cols-2 gap-8">
               {/* Creators */}
-              <div className="bg-indigo-50 rounded-2xl p-8">
-                <div className="w-10 h-10 bg-[#4F46E5] rounded-xl flex items-center justify-center mb-5">
+              <div className="bg-violet-50 rounded-2xl p-8">
+                <div className="w-10 h-10 bg-[#7C3AED] rounded-xl flex items-center justify-center mb-5">
                   <TrendingUp className="h-5 w-5 text-white" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-2">For Creators</h2>
@@ -123,14 +123,14 @@ export default function HomePage() {
                     "No follower minimum — micro-influencers welcome",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2.5 text-sm text-gray-700">
-                      <span className="mt-0.5 w-5 h-5 bg-[#4F46E5] text-white rounded-full flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                      <span className="mt-0.5 w-5 h-5 bg-[#7C3AED] text-white rounded-full flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
                       {item}
                     </li>
                   ))}
                 </ul>
                 <Link
                   href="/signup"
-                  className="inline-flex items-center gap-2 bg-[#4F46E5] text-white font-semibold px-6 py-2.5 rounded-lg hover:bg-[#4338CA] transition-colors text-sm"
+                  className="inline-flex items-center gap-2 bg-[#7C3AED] text-white font-semibold px-6 py-2.5 rounded-lg hover:bg-[#6D28D9] transition-colors text-sm"
                 >
                   Join as a Creator <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -138,7 +138,7 @@ export default function HomePage() {
 
               {/* Brands */}
               <div className="bg-gray-900 rounded-2xl p-8">
-                <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center mb-5">
+                <div className="w-10 h-10 bg-violet-500 rounded-xl flex items-center justify-center mb-5">
                   <ShoppingBag className="h-5 w-5 text-white" />
                 </div>
                 <h2 className="text-xl font-bold text-white mb-2">For Brands</h2>
@@ -154,14 +154,14 @@ export default function HomePage() {
                     "Access a growing network of SEA micro-creators",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2.5 text-sm text-gray-300">
-                      <span className="mt-0.5 w-5 h-5 bg-indigo-500 text-white rounded-full flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
+                      <span className="mt-0.5 w-5 h-5 bg-violet-500 text-white rounded-full flex items-center justify-center shrink-0 text-xs font-bold">✓</span>
                       {item}
                     </li>
                   ))}
                 </ul>
                 <Link
                   href="/signup"
-                  className="inline-flex items-center gap-2 bg-indigo-500 text-white font-semibold px-6 py-2.5 rounded-lg hover:bg-indigo-400 transition-colors text-sm"
+                  className="inline-flex items-center gap-2 bg-violet-500 text-white font-semibold px-6 py-2.5 rounded-lg hover:bg-violet-400 transition-colors text-sm"
                 >
                   Join as a Brand <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -171,17 +171,17 @@ export default function HomePage() {
         </section>
 
         {/* CTA banner */}
-        <section className="bg-[#4F46E5] py-16">
+        <section className="bg-[#7C3AED] py-16">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
               Ready to barter smarter?
             </h2>
-            <p className="text-indigo-200 mb-8 text-sm sm:text-base">
+            <p className="text-violet-200 mb-8 text-sm sm:text-base">
               Join creators and brands across Singapore, Indonesia, Malaysia, and beyond.
             </p>
             <Link
               href="/signup"
-              className="inline-flex items-center gap-2 bg-white text-[#4F46E5] font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-50 transition-colors"
+              className="inline-flex items-center gap-2 bg-white text-[#7C3AED] font-semibold px-8 py-3.5 rounded-xl hover:bg-violet-50 transition-colors"
             >
               Create your free account <ArrowRight className="h-4 w-4" />
             </Link>
@@ -192,7 +192,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-sm font-bold text-[#4F46E5]">Bartr</span>
+          <span className="text-sm font-bold text-[#7C3AED]">Bartr</span>
           <p className="text-xs text-gray-400">
             © {new Date().getFullYear()} Bartr. Creator-brand barter marketplace for Southeast Asia.
           </p>

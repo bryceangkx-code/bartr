@@ -25,7 +25,7 @@ const STATUS_STYLES: Record<string, string> = {
   accepted: "bg-green-50 text-green-700",
   rejected: "bg-red-50 text-red-600",
   in_progress: "bg-yellow-50 text-yellow-700",
-  completed: "bg-indigo-50 text-[#4F46E5]",
+  completed: "bg-violet-50 text-[#7C3AED]",
   cancelled: "bg-gray-100 text-gray-500",
 };
 
@@ -154,7 +154,7 @@ export default function CreatorDealsPage() {
                   </div>
                 )}
                 {deal.status === "completed" && (
-                  <div className="rounded-lg bg-indigo-50 border border-indigo-100 px-3 py-2 text-sm text-[#4F46E5]">
+                  <div className="rounded-lg bg-violet-50 border border-violet-100 px-3 py-2 text-sm text-[#7C3AED]">
                     Deal complete! Thanks for your collaboration.
                   </div>
                 )}

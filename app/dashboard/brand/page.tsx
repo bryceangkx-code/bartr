@@ -92,21 +92,21 @@ export default async function BrandDashboardPage() {
       {/* Quick actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <QuickAction
-          icon={<Plus className="h-5 w-5 text-[#4F46E5]" />}
+          icon={<Plus className="h-5 w-5 text-[#7C3AED]" />}
           title="Post a listing"
           description="Offer your product in exchange for content"
           href="/dashboard/brand/listings/new"
           cta="Create listing"
         />
         <QuickAction
-          icon={<ListChecks className="h-5 w-5 text-[#4F46E5]" />}
+          icon={<ListChecks className="h-5 w-5 text-[#7C3AED]" />}
           title="Manage listings"
           description="View, pause, or close your existing listings"
           href="/dashboard/brand/listings"
           cta="View listings"
         />
         <QuickAction
-          icon={<Users className="h-5 w-5 text-[#4F46E5]" />}
+          icon={<Users className="h-5 w-5 text-[#7C3AED]" />}
           title="Browse creators"
           description="Discover creators that match your brand"
           href="/creators"
@@ -183,9 +183,9 @@ function StatCard({
   highlight?: boolean;
 }) {
   return (
-    <Card className={highlight ? "border-[#4F46E5]" : ""}>
+    <Card className={highlight ? "border-[#7C3AED]" : ""}>
       <CardContent className="pt-5">
-        <p className={`text-3xl font-bold ${highlight ? "text-[#4F46E5]" : ""}`}>
+        <p className={`text-3xl font-bold ${highlight ? "text-[#7C3AED]" : ""}`}>
           {value}
         </p>
         <p className="text-sm font-medium mt-0.5">{label}</p>

@@ -335,7 +335,7 @@ export default function CreatorProfilePage() {
                   className={cn(
                     "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
                     selectedNiches.includes(niche)
-                      ? "border-[#4F46E5] bg-[#4F46E5] text-white"
+                      ? "border-[#7C3AED] bg-[#7C3AED] text-white"
                       : "border-border hover:border-muted-foreground"
                   )}
                 >
@@ -386,7 +386,7 @@ export default function CreatorProfilePage() {
                 </div>
               ))}
               {portfolioUrls.length < 6 && (
-                <label className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center cursor-pointer hover:border-[#4F46E5] transition-colors">
+                <label className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center cursor-pointer hover:border-[#7C3AED] transition-colors">
                   {uploading ? (
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   ) : (

@@ -30,7 +30,7 @@ const STATUS_STYLES: Record<string, string> = {
   accepted: "bg-green-50 text-green-700",
   rejected: "bg-red-50 text-red-600",
   in_progress: "bg-yellow-50 text-yellow-700",
-  completed: "bg-indigo-50 text-[#4F46E5]",
+  completed: "bg-violet-50 text-[#7C3AED]",
   cancelled: "bg-gray-100 text-gray-500",
 };
 
@@ -162,7 +162,7 @@ export default function BrandDealsPage() {
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 text-sm font-medium capitalize border-b-2 transition-colors ${
               activeTab === tab
-                ? "border-[#4F46E5] text-[#4F46E5]"
+                ? "border-[#7C3AED] text-[#7C3AED]"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -226,7 +226,7 @@ export default function BrandDealsPage() {
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 shrink-0">
                       <AvatarImage src={app.creator?.avatar_url ?? undefined} />
-                      <AvatarFallback className="bg-indigo-100 text-[#4F46E5] text-xs font-semibold">
+                      <AvatarFallback className="bg-violet-100 text-[#7C3AED] text-xs font-semibold">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
@@ -274,7 +274,7 @@ export default function BrandDealsPage() {
                     </div>
                   )}
                   {app.status === "completed" && (
-                    <div className="rounded-lg bg-indigo-50 border border-indigo-100 px-3 py-2 text-sm text-[#4F46E5]">
+                    <div className="rounded-lg bg-violet-50 border border-violet-100 px-3 py-2 text-sm text-[#7C3AED]">
                       Deal complete!
                     </div>
                   )}
