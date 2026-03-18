@@ -12,6 +12,16 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { Profile, BrandProfile, Deal, Listing } from "@/types/database";
+import { CreditsSection } from "./credits-section";
+
+type CreditTransaction = {
+  id: string;
+  brand_id: string;
+  amount: number;
+  action: string;
+  note: string | null;
+  created_at: string;
+};
 
 type DealWithListing = Deal & { listings: Pick<Listing, "title"> | null };
 type ListingRow = Pick<Listing, "id" | "title" | "status">;
@@ -32,12 +42,17 @@ export default async function BrandDashboardPage() {
   const profile = profileData as Profile | null;
   if (!profile || profile.role !== "brand") redirect("/dashboard");
 
-  const { data: bpData } = await supabase
-    .from("brand_profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const [{ data: bpData }, { data: transactionsData }] = await Promise.all([
+    supabase.from("brand_profiles").select("*").eq("id", user.id).single(),
+    supabase
+      .from("credit_transactions")
+      .select("*")
+      .eq("brand_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(20),
+  ]);
   const brandProfile = bpData as BrandProfile | null;
+  const transactions = (transactionsData as CreditTransaction[] | null) ?? [];
 
   const { data: listingsData } = await supabase
     .from("listings")
@@ -59,6 +74,12 @@ export default async function BrandDashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* Credits section */}
+      <CreditsSection
+        credits={brandProfile?.credits ?? 0}
+        transactions={transactions}
+      />
+
       {/* Welcome */}
       <div>
         <h1 className="text-2xl font-bold">
