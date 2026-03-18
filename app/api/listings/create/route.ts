@@ -26,6 +26,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  // Credit check
+  const { data: brandData } = await supabase
+    .from("brand_profiles")
+    .select("credits")
+    .eq("id", user.id)
+    .single();
+
+  const credits = (brandData as { credits: number } | null)?.credits ?? 0;
+  if (credits < 1) {
+    return NextResponse.json({ error: "Insufficient credits" }, { status: 402 });
+  }
+
   const { data, error } = await supabase
     .from("listings")
     .insert({
@@ -46,5 +58,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ id: (data as { id: string }).id });
+  const listingId = (data as { id: string }).id;
+
+  // Deduct credit and log transaction
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  const admin = createAdminClient();
+  await admin.from("brand_profiles").update({ credits: credits - 1 }).eq("id", user.id);
+  await admin.from("credit_transactions").insert({
+    brand_id: user.id,
+    amount: -1,
+    action: "post_listing",
+    listing_id: listingId,
+  });
+
+  return NextResponse.json({ id: listingId });
 }

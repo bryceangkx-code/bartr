@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { createClient } from "@/lib/supabase/client";
 import { CREATOR_NICHES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +55,22 @@ export default function NewListingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
+  const [credits, setCredits] = useState<number | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      supabase
+        .from("brand_profiles")
+        .select("credits")
+        .eq("id", user.id)
+        .single()
+        .then(({ data }) => {
+          if (data) setCredits((data as { credits: number }).credits);
+        });
+    });
+  }, []);
 
   const {
     register,
@@ -115,6 +132,16 @@ export default function NewListingPage() {
           </p>
         </div>
       </div>
+
+      {credits === 0 && (
+        <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 mb-6 flex items-center justify-between gap-3">
+          <p className="text-sm text-amber-800">You need credits to post a listing.</p>
+          <Link href="/dashboard/brand" className="text-sm font-semibold text-amber-900 hover:underline shrink-0">Buy Credits →</Link>
+        </div>
+      )}
+      {credits !== null && credits > 0 && (
+        <p className="text-xs text-muted-foreground mb-4">This will use 1 credit. You have {credits} credit{credits !== 1 ? "s" : ""}.</p>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* What you're offering */}
