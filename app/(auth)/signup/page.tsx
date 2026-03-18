@@ -69,12 +69,7 @@ function SignupForm() {
       return;
     }
 
-    if (data.session) {
-      // Email confirmation disabled — session is live, go straight to onboarding
-      router.push(`/onboarding?role=${values.role}`);
-    } else {
-      router.push(`/onboarding?role=${values.role}`);
-    }
+    router.push(`/onboarding?role=${values.role}`);
   }
 
   return (
