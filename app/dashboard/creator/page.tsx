@@ -293,7 +293,7 @@ function StatusBadge({ status }: { status: string }) {
     <span
       className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${map[status] ?? "bg-muted"}`}
     >
-      {status.replace("_", " ")}
+      {status.replace(/_/g, " ")}
     </span>
   );
 }
