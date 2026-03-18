@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, Mail } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,10 +31,11 @@ const signupSchema = z.object({
 
 type SignupValues = z.infer<typeof signupSchema>;
 
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const defaultRole = searchParams.get("role") as "creator" | "brand" | null;
   const [loading, setLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
 
   const {
     register,
@@ -44,6 +45,7 @@ export default function SignupPage() {
     formState: { errors },
   } = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
+    defaultValues: { role: defaultRole ?? undefined },
   });
 
   const selectedRole = watch("role");
@@ -71,34 +73,8 @@ export default function SignupPage() {
       // Email confirmation disabled — session is live, go straight to onboarding
       router.push(`/onboarding?role=${values.role}`);
     } else {
-      // Email confirmation required — tell user to check their inbox
-      setEmailSent(true);
-      setLoading(false);
+      router.push(`/onboarding?role=${values.role}`);
     }
-  }
-
-  if (emailSent) {
-    return (
-      <Card>
-        <CardContent className="pt-8 pb-8 flex flex-col items-center text-center gap-4">
-          <div className="w-12 h-12 bg-violet-50 rounded-full flex items-center justify-center">
-            <Mail className="h-6 w-6 text-[#7C3AED]" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-lg">Check your email</h2>
-            <p className="text-muted-foreground text-sm mt-1">
-              We&apos;ve sent you a confirmation link. Click it to activate your account and complete your profile.
-            </p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Already confirmed?{" "}
-            <Link href="/login" className="text-[#7C3AED] font-medium hover:underline">
-              Log in
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    );
   }
 
   return (
@@ -108,6 +84,13 @@ export default function SignupPage() {
         <CardDescription>
           Join Bartr — trade your influence for products
         </CardDescription>
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-3">
+          <span className="font-medium text-[#7C3AED]">1. Pick your role</span>
+          <span>→</span>
+          <span>Complete your profile</span>
+          <span>→</span>
+          <span>Start browsing</span>
+        </div>
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-5">
@@ -200,5 +183,13 @@ export default function SignupPage() {
         </CardFooter>
       </form>
     </Card>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
   );
 }

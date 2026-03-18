@@ -102,11 +102,8 @@ export default function LoginPage() {
           </Button>
           <p className="text-sm text-muted-foreground text-center">
             Don&apos;t have an account?{" "}
-            <Link
-              href="/signup"
-              className="text-[#7C3AED] font-medium hover:underline"
-            >
-              Sign up
+            <Link href="/signup" className="text-[#7C3AED] font-semibold hover:underline">
+              Sign up free
             </Link>
           </p>
         </CardFooter>

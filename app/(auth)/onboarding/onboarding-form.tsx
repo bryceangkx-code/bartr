@@ -159,6 +159,14 @@ export default function OnboardingForm() {
         </CardHeader>
         <form onSubmit={creatorForm.handleSubmit(submitCreator)}>
           <CardContent className="space-y-4">
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-gray-900">
+                You&apos;re joining as a Creator 🎨
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Once done, you&apos;ll be able to browse product listings and apply to brands.
+              </p>
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="display_name">Your name</Label>
               <Input
@@ -257,6 +265,14 @@ export default function OnboardingForm() {
       </CardHeader>
       <form onSubmit={brandForm.handleSubmit(submitBrand)}>
         <CardContent className="space-y-4">
+          <div className="mb-6">
+            <h2 className="text-lg font-bold text-gray-900">
+              You&apos;re joining as a Brand 🏢
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Once done, you can post your first product listing and start receiving creator applications.
+            </p>
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="display_name">Your name</Label>
             <Input
