@@ -1209,9 +1209,9 @@ section{position:relative;z-index:10}
 
   for(let i=1;i<=TOTAL_FRAMES;i++){
     const img = new Image();
-    img.src = `frames/frame_${pad(i)}.jpg`;
     img.onload = onLoad;
     img.onerror = onLoad; // don't stall on missing frame
+    img.src = `frames/frame_${pad(i)}.jpg`;
     frames.push(img);
   }
 
@@ -1255,7 +1255,11 @@ function startScrollAnim(){
 
   function drawFrame(idx){
     const img = frames[idx];
-    if(!img || !img.complete) return;
+    if(!img) return;
+    if(!img.complete || !img.naturalWidth){
+      img.addEventListener('load', ()=>drawFrame(idx), {once:true});
+      return;
+    }
     const dpr = window.devicePixelRatio;
     const cW = canvas.width, cH = canvas.height;
     const iW = img.naturalWidth, iH = img.naturalHeight;
