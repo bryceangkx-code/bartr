@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, Package, SlidersHorizontal, X } from "lucide-react";
+import { Search, Package, SlidersHorizontal, X, ArrowUpDown } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,7 @@ export default function BrowsePage() {
   const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
   const [maxValue, setMaxValue] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [sort, setSort] = useState<"newest" | "value_high" | "value_low">("newest");
 
   useEffect(() => {
     async function load() {
@@ -83,7 +84,7 @@ export default function BrowsePage() {
   }
 
   const filtered = useMemo(() => {
-    return listings.filter((l) => {
+    const result = listings.filter((l) => {
       if (
         search &&
         !l.title.toLowerCase().includes(search.toLowerCase()) &&
@@ -100,7 +101,12 @@ export default function BrowsePage() {
       }
       return true;
     });
-  }, [listings, search, selectedNiches, maxValue]);
+    return result.sort((a, b) => {
+      if (sort === "value_high") return (b.product_value_sgd ?? 0) - (a.product_value_sgd ?? 0);
+      if (sort === "value_low") return (a.product_value_sgd ?? 0) - (b.product_value_sgd ?? 0);
+      return 0; // "newest" — already sorted by created_at desc from DB
+    });
+  }, [listings, search, selectedNiches, maxValue, sort]);
 
   const activeFilterCount =
     selectedNiches.length + (maxValue ? 1 : 0);
@@ -117,20 +123,34 @@ export default function BrowsePage() {
                 {loading ? "Loading…" : `${filtered.length} active listing${filtered.length !== 1 ? "s" : ""}`}
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFilters((v) => !v)}
-              className="gap-2"
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-              Filters
-              {activeFilterCount > 0 && (
-                <span className="bg-[#7C3AED] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  {activeFilterCount}
-                </span>
-              )}
-            </Button>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <ArrowUpDown className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as typeof sort)}
+                  className="h-9 rounded-md border border-input bg-background pl-8 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none cursor-pointer"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="value_high">Value: High → Low</option>
+                  <option value="value_low">Value: Low → High</option>
+                </select>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters((v) => !v)}
+                className="gap-2"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="bg-[#7C3AED] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            </div>
           </div>
 
           {/* Search */}
