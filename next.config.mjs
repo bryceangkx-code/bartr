@@ -1,10 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
+  async redirects() {
     return [
       {
         source: "/",
-        destination: "/3DWebsiteAsset/index.html",
+        destination: "/3DWebsiteAsset/",
+        permanent: false,
       },
     ];
   },
