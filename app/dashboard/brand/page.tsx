@@ -155,7 +155,7 @@ export default async function BrandDashboardPage() {
                     </p>
                   </div>
                   <Button asChild size="sm">
-                    <Link href={`/dashboard/brand/deals/${deal.id}`}>Review</Link>
+                    <Link href="/dashboard/brand/deals">Review</Link>
                   </Button>
                 </div>
               );

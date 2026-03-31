@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Eye, Pause, X, Loader2 } from "lucide-react";
+import { Plus, Eye, Pause, X, Loader2, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -143,6 +143,12 @@ export default function BrandListingsPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
+                    <Button asChild variant="ghost" size="sm">
+                      <Link href={`/dashboard/brand/listings/${listing.id}/edit`}>
+                        <Edit2 className="mr-1.5 h-3.5 w-3.5" />
+                        Edit
+                      </Link>
+                    </Button>
                     <Button asChild variant="ghost" size="sm">
                       <Link href={`/listings/${listing.id}`}>
                         <Eye className="mr-1.5 h-3.5 w-3.5" />

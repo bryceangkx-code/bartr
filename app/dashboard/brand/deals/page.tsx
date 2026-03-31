@@ -48,6 +48,8 @@ export default function BrandDealsPage() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"pending" | "active" | "closed">("pending");
+  const [pendingAction, setPendingAction] = useState<{ id: string; status: "accepted" | "rejected" } | null>(null);
+  const [noteText, setNoteText] = useState("");
 
   async function load() {
     const supabase = createClient();
@@ -115,12 +117,12 @@ export default function BrandDealsPage() {
 
   useEffect(() => { load(); }, []);
 
-  async function updateDeal(id: string, status: string) {
+  async function updateDeal(id: string, status: string, brandNote?: string) {
     setUpdating(id);
     const res = await fetch(`/api/deals/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status, ...(brandNote ? { brand_note: brandNote } : {}) }),
     });
     const data = await res.json() as { error?: string };
     if (!res.ok) {
@@ -289,14 +291,14 @@ export default function BrandDealsPage() {
                       {new Date(app.created_at).toLocaleDateString()}
                     </span>
                     <div className="flex items-center gap-2">
-                      {app.status === "applied" && (
+                      {app.status === "applied" && pendingAction?.id !== app.id && (
                         <>
                           <Button
                             size="sm"
                             variant="outline"
                             className="text-destructive hover:text-destructive border-red-200"
                             disabled={updating === app.id}
-                            onClick={() => updateDeal(app.id, "rejected")}
+                            onClick={() => { setPendingAction({ id: app.id, status: "rejected" }); setNoteText(""); }}
                           >
                             <X className="mr-1 h-3.5 w-3.5" />
                             Decline
@@ -304,13 +306,9 @@ export default function BrandDealsPage() {
                           <Button
                             size="sm"
                             disabled={updating === app.id}
-                            onClick={() => updateDeal(app.id, "accepted")}
+                            onClick={() => { setPendingAction({ id: app.id, status: "accepted" }); setNoteText(""); }}
                           >
-                            {updating === app.id ? (
-                              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Check className="mr-1 h-3.5 w-3.5" />
-                            )}
+                            <Check className="mr-1 h-3.5 w-3.5" />
                             Accept
                           </Button>
                         </>
@@ -344,6 +342,50 @@ export default function BrandDealsPage() {
                       )}
                     </div>
                   </div>
+
+                  {/* Inline accept/reject note form */}
+                  {pendingAction?.id === app.id && (
+                    <div className="mt-3 space-y-2 rounded-lg border border-muted bg-muted/30 p-3">
+                      <p className="text-xs font-medium text-muted-foreground">
+                        {pendingAction.status === "accepted"
+                          ? "Add a note for the creator (optional)"
+                          : "Add a reason for declining (optional)"}
+                      </p>
+                      <textarea
+                        value={noteText}
+                        onChange={(e) => setNoteText(e.target.value)}
+                        placeholder={
+                          pendingAction.status === "accepted"
+                            ? "e.g. Looking forward to working with you!"
+                            : "e.g. Your audience doesn't match our target market."
+                        }
+                        rows={2}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant={pendingAction.status === "accepted" ? "default" : "destructive"}
+                          disabled={updating === app.id}
+                          onClick={() => {
+                            void updateDeal(app.id, pendingAction.status, noteText || undefined);
+                            setPendingAction(null);
+                            setNoteText("");
+                          }}
+                        >
+                          {updating === app.id && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
+                          {pendingAction.status === "accepted" ? "Confirm accept" : "Confirm decline"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => { setPendingAction(null); setNoteText(""); }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );

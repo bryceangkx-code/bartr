@@ -44,9 +44,35 @@ export default async function CreatorDashboardPage() {
     .from("deals")
     .select("*, listings(title)")
     .eq("creator_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(5);
-  const recentDeals = dealsData as DealWithListing[] | null;
+    .order("created_at", { ascending: false });
+  const allDeals = (dealsData as DealWithListing[] | null) ?? [];
+  const recentDeals = allDeals.slice(0, 5);
+
+  const appliedCount = allDeals.filter((d) => d.status === "applied").length;
+  const activeCount = allDeals.filter((d) => ["accepted", "in_progress"].includes(d.status)).length;
+  const completedCount = allDeals.filter((d) => d.status === "completed").length;
+
+  // Recommended listings based on creator's niches
+  const creatorNiches = creatorProfile?.niches ?? [];
+  let recommendedListings: Pick<import("@/types/database").Listing, "id" | "title" | "product_value_sgd" | "niches">[] = [];
+  if (creatorNiches.length > 0) {
+    const { data: recData } = await supabase
+      .from("listings")
+      .select("id, title, product_value_sgd, niches")
+      .eq("status", "active")
+      .contains("niches", creatorNiches.slice(0, 1))
+      .order("created_at", { ascending: false })
+      .limit(4);
+    recommendedListings = (recData as typeof recommendedListings | null) ?? [];
+  } else {
+    const { data: recData } = await supabase
+      .from("listings")
+      .select("id, title, product_value_sgd, niches")
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(4);
+    recommendedListings = (recData as typeof recommendedListings | null) ?? [];
+  }
 
   // Profile completion score
   const checks = [
@@ -71,6 +97,28 @@ export default async function CreatorDashboardPage() {
         <p className="text-muted-foreground mt-1">
           Here&apos;s what&apos;s happening with your Bartr account.
         </p>
+      </div>
+
+      {/* Deal stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="pt-5">
+            <p className="text-2xl font-bold">{appliedCount}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Applied</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-5">
+            <p className={`text-2xl font-bold ${activeCount > 0 ? "text-[#7C3AED]" : ""}`}>{activeCount}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Active</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-5">
+            <p className="text-2xl font-bold">{completedCount}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Completed</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Profile completion card */}
@@ -235,6 +283,46 @@ export default async function CreatorDashboardPage() {
             <Button asChild>
               <Link href="/browse">Browse listings</Link>
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recommended listings */}
+      {recommendedListings.length > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <div>
+              <CardTitle className="text-base">Recommended for you</CardTitle>
+              <CardDescription>
+                {creatorNiches.length > 0 ? "Based on your niches" : "Latest listings"}
+              </CardDescription>
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/browse">
+                See all <ArrowRight className="ml-1 h-3 w-3" />
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="divide-y">
+            {recommendedListings.map((listing) => (
+              <Link
+                key={listing.id}
+                href={`/listings/${listing.id}`}
+                className="py-3 flex items-center justify-between hover:bg-muted/30 -mx-1 px-1 rounded transition-colors"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{listing.title}</p>
+                  {listing.niches && listing.niches.length > 0 && (
+                    <p className="text-xs text-muted-foreground truncate">
+                      {listing.niches.slice(0, 3).join(" · ")}
+                    </p>
+                  )}
+                </div>
+                <span className="shrink-0 text-sm font-semibold text-[#7C3AED] ml-3">
+                  S${listing.product_value_sgd?.toFixed(0) ?? "—"}
+                </span>
+              </Link>
+            ))}
           </CardContent>
         </Card>
       )}
