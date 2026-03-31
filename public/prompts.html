@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bartr — Scroll-Stop Prompt Set</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #16161a;
+    --surface2: #1e1e24;
+    --border: #2a2a32;
+    --violet: #7C3AED;
+    --violet-light: #a78bfa;
+    --violet-glow: rgba(124,58,237,0.15);
+    --orange: #FF6B35;
+    --orange-glow: rgba(255,107,53,0.12);
+    --text: #f0eeff;
+    --text-muted: #8882a8;
+    --text-dim: #4a4860;
+    --green: #22c55e;
+    --tab-a: #7C3AED;
+    --tab-b: #FF6B35;
+    --tab-c: #06b6d4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 64px 32px 96px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    margin-bottom: 56px;
+  }
+
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--violet-glow);
+    border: 1px solid rgba(124,58,237,0.3);
+    color: var(--violet-light);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+  }
+
+  .header-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--violet-light);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .header-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+
+  .header-title .faded {
+    color: var(--text-dim);
+  }
+
+  .header-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    max-width: 520px;
+  }
+
+  /* ── TABS ── */
+  .tabs-nav {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    margin-bottom: 28px;
+    width: fit-content;
+  }
+
+  .tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover {
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  .tab-btn.active {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .tab-btn[data-tab="a"].active { background: var(--tab-a); }
+  .tab-btn[data-tab="b"].active { background: var(--tab-b); }
+  .tab-btn[data-tab="c"].active { background: var(--tab-c); }
+
+  .tab-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .tab-btn[data-tab="a"] .tab-dot { background: var(--tab-a); }
+  .tab-btn[data-tab="b"] .tab-dot { background: var(--tab-b); }
+  .tab-btn[data-tab="c"] .tab-dot { background: var(--tab-c); }
+
+  .tab-btn.active .tab-dot { background: rgba(255,255,255,0.8); }
+
+  /* ── PROMPT CARD ── */
+  .prompt-panel {
+    display: none;
+  }
+
+  .prompt-panel.active {
+    display: block;
+    animation: fadeIn 0.25s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .prompt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .prompt-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .prompt-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .prompt-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .prompt-card-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    color: var(--text);
+  }
+
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .copy-btn[data-for="a"] { background: var(--violet-glow); border: 1px solid rgba(124,58,237,0.4); color: var(--violet-light); }
+  .copy-btn[data-for="b"] { background: var(--orange-glow); border: 1px solid rgba(255,107,53,0.4); color: var(--orange); }
+  .copy-btn[data-for="c"] { background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3); color: #67e8f9; }
+
+  .copy-btn:hover { opacity: 0.8; transform: scale(0.98); }
+  .copy-btn.copied { background: rgba(34,197,94,0.15) !important; border-color: rgba(34,197,94,0.4) !important; color: var(--green) !important; }
+
+  .prompt-text {
+    padding: 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #c4bfdf;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: var(--surface2);
+    border-radius: 0 0 16px 16px;
+    max-height: 520px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .prompt-text::-webkit-scrollbar { width: 6px; }
+  .prompt-text::-webkit-scrollbar-track { background: transparent; }
+  .prompt-text::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── USAGE HINTS ── */
+  .hints {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .hint-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+
+  .hint-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .hint-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── WORKFLOW ── */
+  .workflow {
+    margin-top: 48px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+
+  .workflow-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  .workflow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .workflow-step {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+
+  .workflow-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .workflow-num.a { background: var(--violet-glow); border: 1px solid rgba(124,58,237,0.3); color: var(--violet-light); }
+  .workflow-num.b { background: var(--orange-glow); border: 1px solid rgba(255,107,53,0.3); color: var(--orange); }
+  .workflow-num.c { background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3); color: #67e8f9; }
+
+  .workflow-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .workflow-desc strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* ── CONFETTI ── */
+  .confetti-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    top: -10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    animation: fall linear forwards;
+  }
+
+  @keyframes fall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 40px 16px 72px; }
+    .hints { grid-template-columns: 1fr; }
+    .tabs-nav { width: 100%; }
+    .tab-btn { flex: 1; justify-content: center; padding: 10px 12px; }
+    .prompt-card-header { flex-direction: column; align-items: flex-start; }
+    .copy-btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="confetti-container" id="confetti"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-badge">Image Generator — Bartr Hero Asset</div>
+    <h1 class="header-title">
+      Scroll-Stop<br>
+      <span class="faded">Prompt Set</span>
+    </h1>
+    <p class="header-sub">
+      3 coordinated prompts for the Bartr hero asset: a hand holding a phone with an Instagram mystery product, pushing it out of the screen as likes surge. Copy each prompt directly into your AI tool.
+    </p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-nav" role="tablist">
+    <button class="tab-btn active" data-tab="a" onclick="switchTab('a')" role="tab">
+      <span class="tab-dot"></span>
+      A — Hero Shot
+    </button>
+    <button class="tab-btn" data-tab="b" onclick="switchTab('b')" role="tab">
+      <span class="tab-dot"></span>
+      B — Breakout
+    </button>
+    <button class="tab-btn" data-tab="c" onclick="switchTab('c')" role="tab">
+      <span class="tab-dot"></span>
+      C — Transition
+    </button>
+  </div>
+
+  <!-- PANEL A -->
+  <div class="prompt-panel active" id="panel-a">
+    <div class="prompt-card">
+      <div class="prompt-card-header">
+        <div class="prompt-card-meta">
+          <span class="prompt-card-label">Prompt A · Image Generator</span>
+          <span class="prompt-card-title">The Hero — Hand Holding Phone with Mystery Product</span>
+        </div>
+        <button class="copy-btn" data-for="a" onclick="copyPrompt('a')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Prompt A
+        </button>
+      </div>
+      <pre class="prompt-text" id="text-a">Professional product photography of a hand holding a modern smartphone, shot from a slight low-angle 3/4 view. Pure white background (#FFFFFF), soft studio lighting with subtle shadow beneath the hand.
+
+The phone screen displays an open Instagram post. On the screen, a perfectly square white cube (with slightly rounded edges) sits centered in the Instagram feed frame — as if it is a product listing. The cube is pure matte white with a bold black question mark (?) centered on its front face. The cube looks like a real 3D object sitting inside the Instagram UI, surrounded by Instagram's familiar interface: like button, comment icon, username placeholder, caption area.
+
+The hand is relaxed and natural — a Southeast Asian hand, neutral skin tone, clean and unpolished. The phone is a current-gen black or dark graphite smartphone (no visible brand logo).
+
+Photorealistic rendering, 16:9 aspect ratio, product catalog quality. Everything in sharp focus — both the hand and the phone screen are crisp. The cube on screen looks tangible and real, almost as if it could be picked up. No additional objects in frame.
+
+Shot on Phase One IQ4 150MP, 85mm lens, f/5.6, large softbox above with white bounce fill. Ultra-sharp detail, 8K quality downsampled to 4K. No text outside the Instagram UI, no watermarks.</pre>
+    </div>
+
+    <div class="hints">
+      <div class="hint-card">
+        <div class="hint-label">Best tools</div>
+        <div class="hint-text">Midjourney v7, FLUX 1.1 Pro, Firefly Image 3</div>
+      </div>
+      <div class="hint-card">
+        <div class="hint-label">Settings</div>
+        <div class="hint-text">16:9 aspect ratio · Highest quality · Photorealistic mode</div>
+      </div>
+      <div class="hint-card">
+        <div class="hint-label">Tip</div>
+        <div class="hint-text">Generate 4 variations and pick the one where the cube is most legible on screen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL B -->
+  <div class="prompt-panel" id="panel-b">
+    <div class="prompt-card">
+      <div class="prompt-card-header">
+        <div class="prompt-card-meta">
+          <span class="prompt-card-label">Prompt B · Image Generator</span>
+          <span class="prompt-card-title">The Breakout — Cube Pushes Through Screen as Likes Surge</span>
+        </div>
+        <button class="copy-btn" data-for="b" onclick="copyPrompt('b')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15 H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Prompt B
+        </button>
+      </div>
+      <pre class="prompt-text" id="text-b">Professional product photography of the SAME hand holding the SAME smartphone from the exact same camera angle and lighting as the reference image (low-angle 3/4 view, pure white background, studio lighting).
+
+NOW: The white matte cube with the black question mark has physically broken through the phone screen — it protrudes halfway out of the display, as if bursting through glass into the real world. The phone screen is cracked in a radial pattern around where the cube has pushed through — hairline glass fractures radiating outward from the cube's exit point. A few tiny glass shards float frozen in the air around the cube.
+
+The cube itself is the same pristine matte white with the black (?) on its face — but it's now partially outside the phone, hovering in 3D space above the hand. It casts a soft real shadow on the hand below.
+
+On the phone screen — visible through the cracked glass in the areas that aren't obscured — the Instagram like counter is shown mid-animation: a large red heart is visible and a rapidly climbing number (e.g., "14,203 likes" in a bold, slightly blurred font to suggest speed). The number has a motion blur effect to imply it's counting upward rapidly.
+
+Same hand, same phone, same white background (#FFFFFF), same soft studio lighting. The transformation is dramatic — product escaping the digital world into the physical.
+
+Photorealistic rendering, 16:9 aspect ratio. Hyperrealistic glass crack detail, realistic cube shadow physics. Shot on Phase One IQ4 150MP, 85mm lens, f/5.6, matching the reference image exactly.</pre>
+    </div>
+
+    <div class="hints">
+      <div class="hint-card">
+        <div class="hint-label">Reference image</div>
+        <div class="hint-text">Upload Prompt A's output as the reference/style image for perfect consistency</div>
+      </div>
+      <div class="hint-card">
+        <div class="hint-label">Settings</div>
+        <div class="hint-text">16:9 · Same model as Prompt A · Use img2img or reference mode</div>
+      </div>
+      <div class="hint-card">
+        <div class="hint-label">If inconsistent</div>
+        <div class="hint-text">Add "match exact lighting direction and skin tone from reference" to the prompt</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL C -->
+  <div class="prompt-panel" id="panel-c">
+    <div class="prompt-card">
+      <div class="prompt-card-header">
+        <div class="prompt-card-meta">
+          <span class="prompt-card-label">Prompt C · Video Model</span>
+          <span class="prompt-card-title">The Transition — Digital to Physical Breakout</span>
+        </div>
+        <button class="copy-btn" data-for="c" onclick="copyPrompt('c')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Prompt C
+        </button>
+      </div>
+      <pre class="prompt-text" id="text-c">START FRAME: A hand holding a dark smartphone in a relaxed 3/4 grip, low-angle view. Pure white background. The phone screen shows an open Instagram post featuring a pristine matte white cube with a black question mark (?) on its face, displayed inside the Instagram feed UI. The cube sits flat and still inside the screen. The hand is relaxed. Everything is still.
+
+END FRAME: The same hand, same phone, same camera angle. The white question mark cube has physically burst through the phone screen, protruding halfway into the real world above the hand. Radial glass cracks spread from the exit point. Tiny glass shards float frozen in the air. The cube casts a real shadow on the hand. On the remaining visible screen area, a large red Instagram heart is visible and the like counter reads a large, blurred-motion number — climbing rapidly.
+
+TRANSITION ANIMATION:
+After a 0.5-second hold on the start frame, the cube begins to vibrate slightly — a subtle pre-tremor, like something trying to escape. Then, over 1.5 seconds, it pushes forward through the screen glass in a single clean motion: the glass fractures outward in a radial burst synchronized with the cube's emergence. Glass crack lines propagate across the screen surface at the moment of impact. Tiny glass shards eject outward and slowly float.
+
+As the cube breaks through, the Instagram like counter begins rapidly incrementing — numbers blur upward. A red heart icon pulses and scales up briefly at the moment the cube exits.
+
+The cube emerges fully and holds its position — half in, half out — for the final 1 second of the clip.
+
+STYLE: Photorealistic. Pure white background throughout. Locked-off tripod shot — no camera movement, no handheld shake. The only motion is the cube's emergence, the glass fracture, and the like counter animation. ASMR-precise, satisfying physics. Think iPhone drop-test video meets Apple Keynote product reveal.
+
+AUDIO SUGGESTION (optional): A crisp glass crack impact sound + satisfying "whoosh" as the cube emerges + rapid digital counter blip for the likes.
+
+DURATION: 5–6 seconds
+ASPECT RATIO: 16:9
+QUALITY: Highest available fidelity, 24fps minimum
+
+VARIATIONS TO GENERATE:
+— Reverse: Cube retreats back into screen, glass repairs itself, likes count down
+— Loop: Forward then reverse, seamless
+— Slow-motion: Same animation at 10 seconds for cinematic hero use</pre>
+    </div>
+
+    <div class="hints">
+      <div class="hint-card">
+        <div class="hint-label">Best video tools</div>
+        <div class="hint-text">Runway Gen-4, Kling 1.6, Pika 2.0, Higgsfield</div>
+      </div>
+      <div class="hint-card">
+        <div class="hint-label">Setup</div>
+        <div class="hint-text">Upload Prompt A as start frame + Prompt B as end frame, then paste this prompt</div>
+      </div>
+      <div class="hint-card">
+        <div class="hint-label">Pro tip</div>
+        <div class="hint-text">Generate the reverse version too — cube being "listed" into the phone is equally powerful</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKFLOW -->
+  <div class="workflow">
+    <div class="workflow-title">Recommended Workflow</div>
+    <div class="workflow-steps">
+      <div class="workflow-step">
+        <div class="workflow-num a">A</div>
+        <div class="workflow-desc">
+          <strong>Generate the Hero Shot first.</strong> Use Midjourney v7 or FLUX 1.1 Pro with 16:9 ratio. Generate 4 variations and pick the one where the cube's question mark is most visible on screen and the hand feels natural.
+        </div>
+      </div>
+      <div class="workflow-step">
+        <div class="workflow-num b">B</div>
+        <div class="workflow-desc">
+          <strong>Generate the Breakout with A as reference.</strong> Upload your chosen Prompt A output as an image reference. This locks in the hand, lighting, and phone — only the cube's position and the cracked screen change. Adjust reference strength to ~70% if the output is too similar.
+        </div>
+      </div>
+      <div class="workflow-step">
+        <div class="workflow-num c">C</div>
+        <div class="workflow-desc">
+          <strong>Generate the Transition video last.</strong> In Runway Gen-4 or Kling, upload Prompt A as the start frame and Prompt B as the end frame. Paste Prompt C into the text field. Generate 2–3 variations and pick the smoothest glass fracture animation.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.prompt-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+    document.getElementById(`panel-${tab}`).classList.add('active');
+  }
+
+  function copyPrompt(tab) {
+    const text = document.getElementById(`text-${tab}`).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector(`.copy-btn[data-for="${tab}"]`);
+      const original = btn.innerHTML;
+      btn.classList.add('copied');
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+      launchConfetti();
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = original;
+      }, 2000);
+    });
+  }
+
+  function launchConfetti() {
+    const colors = ['#7C3AED', '#FF6B35', '#06b6d4', '#a78bfa', '#fbbf24', '#f472b6'];
+    const container = document.getElementById('confetti');
+    for (let i = 0; i < 40; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.cssText = `
+        left: ${Math.random() * 100}%;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        width: ${4 + Math.random() * 8}px;
+        height: ${4 + Math.random() * 8}px;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        animation-duration: ${0.8 + Math.random() * 1.2}s;
+        animation-delay: ${Math.random() * 0.3}s;
+      `;
+      container.appendChild(piece);
+      piece.addEventListener('animationend', () => piece.remove());
+    }
+  }
+</script>
+
+</body>
+</html>
