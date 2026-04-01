@@ -317,6 +317,8 @@ section{position:relative;z-index:10}
 #frame-canvas{
   position:absolute;inset:0;
   width:100%;height:100%;
+  object-fit:cover;
+  object-position:center;
 }
 .annotation-cards-wrap{
   position:absolute;inset:0;
@@ -814,7 +816,7 @@ section{position:relative;z-index:10}
 <!-- ── SCROLL ANIMATION ── -->
 <section id="scroll-section">
   <div class="scroll-sticky">
-    <canvas id="frame-canvas"></canvas>
+    <img id="frame-canvas" src="frames/frame_0001.jpg" alt="">
 
     <!-- Annotation cards -->
     <div class="annotation-cards-wrap">
@@ -1222,8 +1224,7 @@ section{position:relative;z-index:10}
    SCROLL ANIMATION
 ───────────────────────────────────────────── */
 function startScrollAnim(){
-  const canvas = document.getElementById('frame-canvas');
-  const ctx = canvas.getContext('2d');
+  const frameImg = document.getElementById('frame-canvas');
   const section = document.getElementById('scroll-section');
   const frames = window._frames;
   const TOTAL = frames.length;
@@ -1241,43 +1242,12 @@ function startScrollAnim(){
     snapPoints.push(show);
   });
 
-  function resize(){
-    canvas.width = window.innerWidth * window.devicePixelRatio;
-    canvas.height = window.innerHeight * window.devicePixelRatio;
-    canvas.style.width = window.innerWidth+'px';
-    canvas.style.height = window.innerHeight+'px';
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  let currentFrame = 0;
   let rafId = null;
 
   function drawFrame(idx){
     const img = frames[idx];
     if(!img) return;
-    if(!img.complete || !img.naturalWidth){
-      img.addEventListener('load', ()=>drawFrame(idx), {once:true});
-      return;
-    }
-    const dpr = window.devicePixelRatio;
-    const cW = canvas.width, cH = canvas.height;
-    const iW = img.naturalWidth, iH = img.naturalHeight;
-    if(!iW||!iH) return;
-
-    // Cover-fit on desktop, contain-fit zoomed on mobile
-    let scale, dx, dy, dw, dh;
-    const mobile = window.innerWidth < 768;
-    if(mobile){
-      scale = Math.min(cW/iW, cH/iH)*1.1;
-    } else {
-      scale = Math.max(cW/iW, cH/iH);
-    }
-    dw = iW*scale; dh = iH*scale;
-    dx = (cW-dw)/2; dy = (cH-dh)/2;
-
-    ctx.clearRect(0,0,cW,cH);
-    ctx.drawImage(img, dx, dy, dw, dh);
+    frameImg.src = img.src;
   }
 
   function getScrollProgress(){
