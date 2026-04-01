@@ -816,7 +816,7 @@ section{position:relative;z-index:10}
 <!-- ── SCROLL ANIMATION ── -->
 <section id="scroll-section">
   <div class="scroll-sticky">
-    <img id="frame-canvas" src="frames/frame_0001.jpg" alt="">
+    <img id="frame-canvas" src="/3DWebsiteAsset/frames/frame_0001.jpg" alt="">
 
     <!-- Annotation cards -->
     <div class="annotation-cards-wrap">
@@ -1213,7 +1213,7 @@ section{position:relative;z-index:10}
     const img = new Image();
     img.onload = onLoad;
     img.onerror = onLoad; // don't stall on missing frame
-    img.src = `frames/frame_${pad(i)}.jpg`;
+    img.src = `/3DWebsiteAsset/frames/frame_${pad(i)}.jpg`;
     frames.push(img);
   }
 
